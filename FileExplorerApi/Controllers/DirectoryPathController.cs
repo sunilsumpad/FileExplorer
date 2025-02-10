@@ -42,7 +42,7 @@ namespace FileExplorerApi.Controllers
                     .Select(d => GetDirectoryTree(d.FullName))
                     .ToList(),
                 Files = directoryInfo.GetFiles()
-                    .Where(d =>!d.Name.StartsWith('.'))
+                    .Where(f =>!f.Name.StartsWith('.'))
                     .Select(f => f.Name).ToList()
             };
         }
