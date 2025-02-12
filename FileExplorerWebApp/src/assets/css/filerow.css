@@ -1,0 +1,13 @@
+.folder-row {
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.folder-row:hover {
+  background: #f8f8f8;
+}
+
+.icon {
+  margin-right: 5px;
+  font-size: 18px;
+}
