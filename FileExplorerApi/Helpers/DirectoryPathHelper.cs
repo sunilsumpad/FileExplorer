@@ -32,7 +32,7 @@ namespace FileExplorerApi.DirectoryPathHelpers
         {
             foreach (var dir in directoryInfo.GetDirectories().Where(d => !IsHidden(d)))
             {
-                directoryItem.Children.Add((DirectoryItem)GetDirectoryTree(dir.FullName));
+                directoryItem.Children.Add(CreateDirectoryItem(new DirectoryInfo(dir.FullName)));
             }
             return directoryItem;
         }
