@@ -53,6 +53,7 @@ namespace FileExplorerApi.DirectoryPathHelpers
                 Name = file.Name,
                 Type = "file",
                 Path = file.FullName,
+                Size = file.Length,
                 FileExtension = file.Extension
             };
         }
