@@ -58,24 +58,3 @@ body {
 .input-container button:hover {
   background: #23272b;
 }
-
-/* File Table Container (Scrolls Horizontally & Vertically) */
-.table-container {
-  height: 70dvh;
-  overflow: auto; /* Enables both vertical & horizontal scrolling */
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background: #fff;
-}
-
-/* File Table */
-.file-table {
-  width: 100%;
-  min-width: 600px;
-  border-collapse: collapse;
-}
-
-.icon {
-  margin-right: 8px;
-  font-size: 18px;
-}

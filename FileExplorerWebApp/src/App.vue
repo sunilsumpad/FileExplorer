@@ -4,49 +4,37 @@
 
     <div class="input-container">
       <input v-model="rootPath" placeholder="Enter a path (e.g., /home/user)" />
-      <button class="default-btn-class" @click="fetchFiles">Browse</button>
+      <button class="default-btn-class" @click="triggerFetch">Browse</button>
     </div>
 
-    <!-- Scrollable Container -->
-    <div class="table-container">
-      <table class="file-table">
-        <tbody>
-          <file-row v-for="(folder, index) in folders" :key="index" :folder="folder" :depth="1" />
-        </tbody>
-      </table>
-    </div>
+    <FileBrowser
+      :rootPath="rootPath"
+      :fetchTriggered="fetchTriggered"
+      @fetch-complete="resetFetchTrigger"
+    />
   </div>
 </template>
 
 <script>
 import { ref } from 'vue'
-import FileRow from './components/FileRow.vue'
+import FileBrowser from './components/FileBrowser.vue'
 import '@/assets/css/app.css'
-import apiClient from '@/api'
 
 export default {
-  components: { FileRow },
+  components: { FileBrowser },
   setup() {
-    const rootPath = ref('/Users/sunilpadmanabhan/Work/ASPDotNetCore/SunilDev/')
-    const folders = ref([])
+    const rootPath = ref('') // This binds to the input field
+    const fetchTriggered = ref(false)
 
-    const fetchFiles = async () => {
-      folders.value = [] // Reset on new path
-      try {
-        const response = await apiClient.get(
-          `/api/DirectoryPath/directories?path=${encodeURIComponent(rootPath.value)}`,
-        )
-        if (response.status >= 200 && response.status < 300) {
-          const data = await response.data
-          folders.value = data.children || []
-        } else {
-          throw new Error(`HTTP error! Status: ${response.status}`)
-        }
-      } catch (err) {
-        console.error(err.message)
-      }
+    const triggerFetch = () => {
+      fetchTriggered.value = true
     }
-    return { rootPath, folders, fetchFiles }
+
+    const resetFetchTrigger = () => {
+      fetchTriggered.value = false
+    }
+
+    return { rootPath, fetchTriggered, triggerFetch, resetFetchTrigger }
   },
 }
 </script>

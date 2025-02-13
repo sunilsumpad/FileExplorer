@@ -13,6 +13,7 @@
   "dependencies": {
     "axios": "^1.7.9",
     "file-icons-vue": "^1.3.4",
+    "moment": "^2.30.1",
     "vue": "^3.5.13"
   },
   "devDependencies": {
