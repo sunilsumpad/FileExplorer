@@ -24,6 +24,8 @@ namespace FileExplorerApi.DirectoryPathHelpers
                 Name = directoryInfo.Name,
                 Type = "directory",
                 Path = directoryInfo.FullName,
+                CreationDateTime = directoryInfo.CreationTime,
+                ModifiedDateTime = directoryInfo.LastWriteTime,
                 Children = new List<DirectoryItem>()
             };
         }
@@ -54,6 +56,8 @@ namespace FileExplorerApi.DirectoryPathHelpers
                 Type = "file",
                 Path = file.FullName,
                 Size = file.Length,
+                CreationDateTime = file.CreationTime,
+                ModifiedDateTime = file.LastWriteTime,
                 FileExtension = file.Extension
             };
         }
