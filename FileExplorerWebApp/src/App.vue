@@ -4,7 +4,7 @@
 
     <div class="input-container">
       <input v-model="rootPath" placeholder="Enter a path (e.g., /home/user)" />
-      <button @click="fetchFiles">Browse</button>
+      <button class="default-btn-class" @click="fetchFiles">Browse</button>
     </div>
 
     <!-- Scrollable Container -->

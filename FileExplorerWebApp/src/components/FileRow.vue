@@ -1,14 +1,17 @@
 <template>
   <tr @click="toggleFolder" class="folder-row">
     <td :style="{ paddingLeft: depth * 20 + 'px' }">
+      <!-- FOLDER -->
       <span v-if="folder.type === 'directory'">
         <span class="icon">{{ expanded ? '📂' : '📁' }}</span>
         <strong>{{ folder.name }}</strong>
       </span>
-
+      <!-- FILE -->
       <span v-else>
-        <span class="icon">📄</span>
-        {{ folder.name }}
+        <FileIcons :name="folder.name" :width="20" :height="20" :isFolder="false" :isMulti="false" :isLink="false"
+          :itemStyle="{ display: 'inline', alignItems: 'center' }" />
+        <span>{{ folder.name }}</span>
+        <button @click.stop="copyPath(folder.path)" class="copy-btn">📋 Copy Path</button>
       </span>
     </td>
   </tr>
@@ -24,8 +27,12 @@
 import { ref, watch } from 'vue'
 import '@/assets/css/filerow.css'
 import apiClient from '@/api'
+import FileIcons from 'file-icons-vue';
 
 export default {
+  components: {
+    FileIcons
+  },
   props: {
     folder: Object,
     depth: { type: Number, default: 1 },
@@ -56,7 +63,15 @@ export default {
         expanded.value = true
       }
     }
-
+    const copyPath = (path) => {
+      navigator.clipboard.writeText(path)
+        .then(() => {
+          alert('Path: ' + path + ' copied to clipboard!')
+        })
+        .catch((err) => {
+          console.error('Failed to copy path: ', err)
+        })
+    }
     // Reset when new path is entered
     watch(
       () => props.folder,
@@ -66,7 +81,7 @@ export default {
       },
     )
 
-    return { expanded, subfolders, toggleFolder }
+    return { expanded, subfolders, toggleFolder, copyPath }
   },
 }
 </script>
