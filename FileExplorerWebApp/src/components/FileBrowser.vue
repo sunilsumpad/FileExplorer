@@ -11,7 +11,10 @@
               <span class="current-path">{{ currentPathBreadCrumb }}</span>
             </th>
           </tr>
-          <tr v-if="folders.length">
+          <tr colspan="5" v-if="!rootPath" class="empty-folder-msg">
+            Path not provided
+          </tr>
+          <tr v-else-if="folders.length">
             <th class="left-align" @click="sortBy('name')">
               Name
               <span v-if="sortColumn === 'name'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
