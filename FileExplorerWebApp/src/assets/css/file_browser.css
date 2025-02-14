@@ -83,6 +83,15 @@
   cursor: pointer;
   transition: background 0.5s;
   margin-right: 10px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+.back-btn:hover {
+  cursor: pointer;
+  background: #5a6268;
 }
 
 .current-path {
