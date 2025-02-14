@@ -5,7 +5,11 @@
         <thead>
           <tr>
             <th class="navigation left-align" colspan="5">
-              <button v-if="currentPath !== rootPath" class="back-btn" @click="navigateUp">
+              <button
+                v-if="currentPath !== rootPath && fetchTriggered"
+                class="back-btn"
+                @click="navigateUp"
+              >
                 ◀︎ Back
               </button>
               <span class="current-path">{{ currentPathBreadCrumb }}</span>
