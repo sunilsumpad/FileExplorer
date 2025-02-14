@@ -110,14 +110,6 @@ export default {
       },
     )
 
-    // Watch for changes in rootPath prop and update currentPath
-    watch(
-      () => props.rootPath,
-      (newRootPath) => {
-        currentPath.value = newRootPath
-      },
-    )
-
     const navigateToFolder = (folderName) => {
       currentPath.value = `${currentPath.value}/${folderName}`
       fetchFiles(currentPath.value)
