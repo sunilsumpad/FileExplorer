@@ -1,0 +1,8 @@
+ToDo: List of Tasks to do
+Add custom support for icons, if not present in file-vue-icons package
+Move Filebrowser API call to calling component, with file browser data & file browser columns passed from calling component
+Move Filerow css to separate filerow.css file
+
+InProgress: List of Tasks in progress
+
+Done: List of Tasks completed
