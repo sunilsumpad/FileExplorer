@@ -3,38 +3,34 @@
     <header class="header">📁 File Browser</header>
 
     <div class="input-container">
-      <input v-model="rootPath" placeholder="Enter a path (e.g., /home/user)" />
-      <button class="default-btn-class" @click="triggerFetch">Browse</button>
+      <input v-model="path" placeholder="Enter a path (e.g., /home/user)" />
+      <button class="default-btn-class" @click="sendPath">Browse</button>
     </div>
-
-    <FileBrowser
-      :rootPath="rootPath"
-      :fetchTriggered="fetchTriggered"
-      @fetch-complete="resetFetchTrigger"
-    />
+    <FileBrowser :path="sentPath"/>
   </div>
 </template>
 
 <script>
-import { ref } from 'vue'
-import FileBrowser from './components/FileBrowser.vue'
 import '@/assets/css/app.css'
+import FileBrowser from './components/FileBrowser.vue'
 
 export default {
   components: { FileBrowser },
-  setup() {
-    const rootPath = ref('') // This binds to the input field
-    const fetchTriggered = ref(false)
-
-    const triggerFetch = () => {
-      fetchTriggered.value = true
+  data() {
+    return {
+      path: '',
+      sentPath: '',
     }
-
-    const resetFetchTrigger = () => {
-      fetchTriggered.value = false
+  },
+  methods: {
+    sendPath() {
+      if (this.path) {
+        this.sentPath = this.path
+      }
+      else {
+        alert('Please enter the path')
+      }
     }
-
-    return { rootPath, fetchTriggered, triggerFetch, resetFetchTrigger }
   },
 }
 </script>

@@ -1,50 +1,22 @@
 <template>
-  <tr @click="handleClick" :class="{ folder: file.type === 'directory' }">
-    <td class="left-align">
-      <span v-if="file.type === 'directory'">📁 {{ file.name }}</span>
-      <span v-else>
-        <FileIcons
-          :name="file.name"
-          :width="20"
-          :height="20"
-          :isFolder="false"
-          :isMulti="false"
-          :isLink="false"
-          :itemStyle="{ display: 'inline', alignItems: 'center' }"
-        />
-        <span>{{ file.name }}</span>
-      </span>
-    </td>
+  <tr>
+    <td class="left-align">{{ file.name }}</td>
     <td>{{ formatSize(file.size) || '-' }}</td>
-    <td>{{ formatDate(file.creationDateTime) }}</td>
-    <td>{{ formatDate(file.modifiedDateTime) }}</td>
-    <td>
-      <span v-if="file.type === 'file'"
-        ><button @click.stop="copyPath(file.path)" class="copy-btn">📋 Copy Path</button>
-      </span>
-    </td>
+    <td>{{ formatDate(file.creationDateTime) || '-' }}</td>
+    <td>{{ formatDate(file.modifiedDateTime) || '-' }}</td>
+    <td></td>
   </tr>
 </template>
 
 <script>
-import '@/assets/css/file_browser.css'
-import FileIcons from 'file-icons-vue'
+import '@/assets/css/file_row.css'
 import moment from 'moment'
 
 export default {
   props: {
     file: Object,
   },
-  components: {
-    FileIcons,
-  },
-  emits: ['open-folder'],
   methods: {
-    handleClick() {
-      if (this.file.type === 'directory') {
-        this.$emit('open-folder', this.file.name)
-      }
-    },
     formatDate(date) {
       return date ? moment(date).format('DD/MM/YYYY hh:mm:ss A') : '-'
     },
@@ -57,16 +29,6 @@ export default {
           : size < 1073741824
             ? `${(size / 1048576).toFixed(1)} MB`
             : `${(size / 1073741824).toFixed(1)} GB`
-    },
-    copyPath(path) {
-      navigator.clipboard
-        .writeText(path)
-        .then(() => {
-          alert('Path: "' + path + '" has been copied to the clipboard!')
-        })
-        .catch((err) => {
-          console.error('Failed to copy path: ', err)
-        })
     },
   },
 }
