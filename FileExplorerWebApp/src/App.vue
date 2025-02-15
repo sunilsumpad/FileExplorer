@@ -1,10 +1,10 @@
 <template>
   <div class="app">
-    <header class="header">📁 File Browser</header>
+    <header class="header">{{ UI_LABELS.APP_TITLE }}</header>
 
     <div class="input-container">
-      <input v-model="path" placeholder="Enter a path (e.g., /home/user)" />
-      <button class="default-btn-class" @click="sendPath">Browse</button>
+      <input v-model="inputPath" name="inputPath" :placeholder="UI_LABELS.INPUT_PLACEHOLDER" />
+      <button class="default-btn-class" @click="sendPath">{{ UI_LABELS.BROWSE_BUTTON }}</button>
     </div>
     <FileBrowser :path="sentPath"/>
   </div>
@@ -13,24 +13,25 @@
 <script>
 import '@/assets/css/app.css'
 import FileBrowser from './components/FileBrowser.vue'
+import { UI_LABELS, ERROR_MESSAGES } from '@/constants/config'
 
 export default {
   components: { FileBrowser },
   data() {
     return {
-      path: '',
+      inputPath: '',
       sentPath: '',
+      UI_LABELS
     }
   },
   methods: {
     sendPath() {
-      if (this.path) {
-        this.sentPath = this.path
-      }
-      else {
-        alert('Please enter the path')
+      if (this.inputPath) {
+        this.sentPath = this.inputPath
+      } else {
+        alert(ERROR_MESSAGES.INPUT_PATH_REQUIRED)
       }
     }
-  },
+  }
 }
 </script>
