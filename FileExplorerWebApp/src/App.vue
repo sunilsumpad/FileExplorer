@@ -1,40 +1,37 @@
 <template>
   <div class="app">
-    <header class="header">📁 File Browser</header>
+    <header class="header">{{ UI_LABELS.APP_TITLE }}</header>
 
     <div class="input-container">
-      <input v-model="rootPath" placeholder="Enter a path (e.g., /home/user)" />
-      <button class="default-btn-class" @click="triggerFetch">Browse</button>
+      <input v-model="inputPath" name="inputPath" :placeholder="UI_LABELS.INPUT_PLACEHOLDER" />
+      <button class="default-btn-class" @click="sendPath">{{ UI_LABELS.BROWSE_BUTTON }}</button>
     </div>
-
-    <FileBrowser
-      :rootPath="rootPath"
-      :fetchTriggered="fetchTriggered"
-      @fetch-complete="resetFetchTrigger"
-    />
+    <FileBrowser :path="sentPath"/>
   </div>
 </template>
 
 <script>
-import { ref } from 'vue'
-import FileBrowser from './components/FileBrowser.vue'
 import '@/assets/css/app.css'
+import FileBrowser from './components/FileBrowser.vue'
+import { UI_LABELS, ERROR_MESSAGES } from '@/constants/config'
 
 export default {
   components: { FileBrowser },
-  setup() {
-    const rootPath = ref('') // This binds to the input field
-    const fetchTriggered = ref(false)
-
-    const triggerFetch = () => {
-      fetchTriggered.value = true
+  data() {
+    return {
+      inputPath: '',
+      sentPath: '',
+      UI_LABELS
     }
-
-    const resetFetchTrigger = () => {
-      fetchTriggered.value = false
-    }
-
-    return { rootPath, fetchTriggered, triggerFetch, resetFetchTrigger }
   },
+  methods: {
+    sendPath() {
+      if (this.inputPath) {
+        this.sentPath = this.inputPath
+      } else {
+        alert(ERROR_MESSAGES.INPUT_PATH_REQUIRED)
+      }
+    }
+  }
 }
 </script>

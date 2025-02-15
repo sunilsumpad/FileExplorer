@@ -4,52 +4,44 @@
       <table class="file-table">
         <thead>
           <tr>
-            <th class="navigation left-align" colspan="5">
-              <button
-                v-if="currentPath !== rootPath && fetchTriggered"
-                class="back-btn"
-                @click="navigateUp"
-              >
-                ◀︎ Back
+            <th v-if="currentPath !== path" colspan="5" class="left-align">
+              <button class="back-btn" @click="navigateToParentFolder">
+                {{ UI_ICONS.BACK }} {{ UI_LABELS.BACK_BUTTON }}
               </button>
-              <span class="current-path">{{ currentPathBreadCrumb }}</span>
+              {{ currentPathBreadCrumb }}
             </th>
           </tr>
-          <tr colspan="5" v-if="!rootPath" class="empty-folder-msg">
-            Path not provided
-          </tr>
-          <tr v-else-if="folders.length">
-            <th class="left-align" @click="sortBy('name')">
-              Name
-              <span v-if="sortColumn === 'name'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          <tr>
+            <th v-for="column in TABLE_COLUMNS"
+              :key="column.key"
+              :class="{ 'left-align': column.key === COLUMN_KEYS.NAME }"
+              @click="sortBy(column.key)">
+              {{ column.label }}
+              <span v-if="sortColumn === column.key">
+                {{ sortDirection === SORT_DIRECTIONS.ASC ? UI_ICONS.SORT_ASC : UI_ICONS.SORT_DESC }}
+              </span>
             </th>
-            <th @click="sortBy('size')">
-              Size
-              <span v-if="sortColumn === 'size'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-            </th>
-            <th @click="sortBy('created')">
-              Created
-              <span v-if="sortColumn === 'created'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-            </th>
-            <th @click="sortBy('modified')">
-              Modified
-              <span v-if="sortColumn === 'modified'">{{
-                sortDirection === 'asc' ? '▲' : '▼'
-              }}</span>
-            </th>
-            <th>Actions</th>
-          </tr>
-          <tr colspan="5" v-else class="empty-folder-msg">
-            📂 Folder is empty
+            <th class="th-action">{{ UI_LABELS.ACTIONS }}</th>
           </tr>
         </thead>
         <tbody>
+          <tr v-if="!path">
+            <td colspan="5" class="empty-folder">
+              {{ ERROR_MESSAGES.PATH_REQUIRED }}
+            </td>
+          </tr>
           <FileRow
+            v-else-if="folders.length"
             v-for="(item, index) in sortedFiles"
             :key="index"
             :file="item"
-            @open-folder="navigateToFolder"
+            @open-child-folder="navigateToChildFolder"
           />
+          <tr v-else>
+            <td colspan="5" class="empty-folder">
+              {{ UI_ICONS.EMPTY_FOLDER }} {{ UI_LABELS.EMPTY_FOLDER }}
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -57,112 +49,109 @@
 </template>
 
 <script>
-import { ref, computed, watch } from 'vue'
-import FileRow from './FileRow.vue'
-import apiClient from '@/api'
 import '@/assets/css/file_browser.css'
+import apiClient from '@/api'
+import FileRow from './FileRow.vue'
+import {
+  COLUMN_KEYS,
+  TABLE_COLUMNS,
+  API_ENDPOINTS,
+  DEFAULT_SORT,
+  ERROR_MESSAGES,
+  UI_LABELS,
+  UI_ICONS,
+  SORT_DIRECTIONS,
+} from '@/constants/config'
 
 export default {
   components: { FileRow },
-  props: {
-    rootPath: String,
-    fetchTriggered: Boolean,
+  data() {
+    return {
+      folders: [],
+      sortColumn: DEFAULT_SORT.COLUMN,
+      sortDirection: DEFAULT_SORT.DIRECTION,
+      currentPath: '',
+      currentPathBreadCrumb: '',
+      COLUMN_KEYS,
+      TABLE_COLUMNS,
+      UI_LABELS,
+      UI_ICONS,
+      SORT_DIRECTIONS,
+      ERROR_MESSAGES
+    }
   },
-  emits: ['fetch-complete'],
-  setup(props, { emit }) {
-    // Initialize currentPath with rootPath
-    const currentPath = ref(props.rootPath)
-    const currentPathBreadCrumb = ref()
-    const folders = ref([])
-    const sortColumn = ref('name')
-    const sortDirection = ref('asc')
-
-    // Fetch files based on the current path
-    const fetchFiles = async (path) => {
-      folders.value = [] // Reset on new path
+  props: {
+    path: String,
+  },
+  watch: {
+    path(newValue) {
+      if (newValue) {
+        this.currentPath = newValue
+        this.fetchFiles(newValue)
+      }
+    },
+  },
+  methods: {
+    async fetchFiles(path) {
+      this.folders = [] // Reset on new path
       try {
         const response = await apiClient.get(
-          `/api/DirectoryPath/directories?path=${encodeURIComponent(path)}`,
+          `${API_ENDPOINTS.GET_DIRECTORIES}?path=${encodeURIComponent(path)}`
         )
-        if (response.status == 200) {
-          currentPathBreadCrumb.value = response.data.path.replace('/', '').replace(/\//g, ' > ')
-          folders.value = response.data.children || []
+        if (response.status === 200) {
+          this.currentPathBreadCrumb = response.data.path
+            .replace('/', '')
+            .replace(/\//g, ` ${UI_LABELS.BREADCRUMB_SEPARATOR} `)
+          this.folders = response.data.children || []
         } else {
-          alert(`HTTP error! Status: ${response.status}`)
-          throw new Error(`HTTP error! Status: ${response}`)
+          console.error(`HTTP error! Status: ${response.status}`)
         }
       } catch (err) {
-        if (err.status == 400) {
-          alert('Please enter a valid folder path.')
-        } else if (err.status == 404) {
-          alert('The specified folder path was not found.')
+        if (err.status === 400) {
+          alert(ERROR_MESSAGES.GET_DIRECTORIES_INVALID_PATH)
+        } else if (err.status === 404) {
+          alert(ERROR_MESSAGES.GET_DIRECTORIES_NOT_FOUND)
         } else {
-          console.log(err.message)
+          console.error(err.message)
         }
       }
-      emit('fetch-complete')
-    }
-
-    // Watch for the fetchTriggered prop to trigger the fetch
-    watch(
-      () => props.fetchTriggered,
-      (newVal) => {
-        if (newVal) {
-          currentPath.value = props.rootPath
-          fetchFiles(props.rootPath)
-        }
-      },
-    )
-
-    const navigateToFolder = (folderName) => {
-      currentPath.value = `${currentPath.value}/${folderName}`
-      fetchFiles(currentPath.value)
-    }
-
-    const navigateUp = () => {
-      if (currentPath.value !== props.rootPath) {
-        currentPath.value = currentPath.value.substring(0, currentPath.value.lastIndexOf('/'))
-        fetchFiles(currentPath.value)
+    },
+    sortBy(column) {
+      if (this.sortColumn === column) {
+        this.sortDirection = this.sortDirection === SORT_DIRECTIONS.ASC ? SORT_DIRECTIONS.DESC : SORT_DIRECTIONS.ASC
+      } else {
+        this.sortColumn = column
+        this.sortDirection = SORT_DIRECTIONS.ASC
       }
-    }
-
-    const sortedFiles = computed(() => {
-      return [...folders.value].sort((a, b) => {
+    },
+    navigateToChildFolder(folderName) {
+      this.currentPath = `${this.currentPath}/${folderName}`
+      this.fetchFiles(this.currentPath)
+    },
+    navigateToParentFolder() {
+      this.currentPath = this.currentPath.substring(0, this.currentPath.lastIndexOf('/'))
+      this.fetchFiles(this.currentPath)
+    },
+  },
+  computed: {
+    sortedFiles() {
+      return [...this.folders].sort((a, b) => {
         let result = 0
         if (a.type !== b.type) return a.type === 'directory' ? -1 : 1
-        if (sortColumn.value === 'name') {
+
+        if (this.sortColumn === COLUMN_KEYS.NAME) {
           result = a.name.localeCompare(b.name)
-        } else if (sortColumn.value === 'size') {
+        } else if (this.sortColumn === COLUMN_KEYS.SIZE) {
           result = (a.size || 0) - (b.size || 0)
-        } else if (sortColumn.value === 'created') {
+        } else if (this.sortColumn === COLUMN_KEYS.CREATED) {
           result = new Date(a.creationDateTime || 0) - new Date(b.creationDateTime || 0)
-        } else if (sortColumn.value === 'modified') {
+        } else if (this.sortColumn === COLUMN_KEYS.MODIFIED) {
           result = new Date(a.modifiedDateTime || 0) - new Date(b.modifiedDateTime || 0)
         }
-        return sortDirection.value === 'asc' ? result : -result
+
+        return this.sortDirection === SORT_DIRECTIONS.ASC ? result : -result
       })
-    })
-
-    const sortBy = (column) => {
-      if (sortColumn.value === column) {
-        sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-      } else {
-        sortColumn.value = column
-        sortDirection.value = 'asc'
-      }
-    }
-
-    return {
-      currentPath,
-      currentPathBreadCrumb,
-      folders,
-      sortedFiles,
-      navigateToFolder,
-      navigateUp,
-      sortBy,
-      sortColumn,
-      sortDirection,
-    }
+    },
   },
 }
 </script>
